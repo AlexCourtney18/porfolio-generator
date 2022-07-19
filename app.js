@@ -1,8 +1,11 @@
 const { link } = require('fs');
 const inquirer = require('inquirer');
 
+const fs = require('fs');
+const generatePage = require('./src/page-template');
+
 const promptUser = () => {
-return inquirer.prompt([
+    return inquirer.prompt([
         {
             type: 'input',
             name: 'name',
@@ -52,8 +55,8 @@ return inquirer.prompt([
 
 const promptProject = portfolioData => {
     // If there's no 'projects' array property, create one
-    if (!portfolioData.projects){
-    portfolioData.projects = [];
+    if (!portfolioData.projects) {
+        portfolioData.projects = [];
     }
     console.log(`
     ==============
@@ -119,31 +122,29 @@ const promptProject = portfolioData => {
             default: false
         }
     ])
-    .then(projectData => {
-        portfolioData.projects.push(projectData);
-        if (projectData.confirmAddProject) {
-            return promptProject(portfolioData);
-        } else {
-            return portfolioData;
-        }
-    });
+        .then(projectData => {
+            portfolioData.projects.push(projectData);
+            if (projectData.confirmAddProject) {
+                return promptProject(portfolioData);
+            } else {
+                return portfolioData;
+            }
+        });
 };
 
 promptUser()
-.then(promptProject)
-.then(portfolioData => {
-    console.log(portfolioData);
-});
+    .then(promptProject)
+    .then(portfolioData => {
+        const pageHTML = generatePage(portfolioData);
+
+        fs.writeFile('./index.html', pageHTML, err => {
+            if (err) throw new Error (err);
+
+            console.log('Page created! Check out index.html in this directory to see it!');
+        });
+    });
 
 
 
 
-// const fs = require('fs');
-// const generatePage = require('./src/page-template');
-
-// fs.writeFile('./index.html', pageHTML, err => {
-//     if (err) throw err;
-
-//     console.log('Portfolio complete! Check out index.html to see the output!');
-// });
 
